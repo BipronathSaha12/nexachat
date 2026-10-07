@@ -1,0 +1,197 @@
+@import 'tailwindcss';
+
+/* ---------------------------------------------------------------------------
+   Design tokens.
+
+   Tailwind v4 emits @theme variables into :root, so the light palette is the
+   base and the dark palette overrides the same custom properties later in the
+   cascade. @theme cannot live inside @media -- doing that silently applies one
+   palette unconditionally, which is how light mode was broken before.
+
+   The palette is deliberately low-chroma: neutrals carry the interface and the
+   single accent is reserved for actions the user can take. Colour is
+   information here, not decoration.
+--------------------------------------------------------------------------- */
+
+@theme {
+  /* Surfaces, from page background upward */
+  --color-canvas: oklch(99% 0.002 95);
+  --color-surface: oklch(100% 0 0);
+  --color-raised: oklch(97.2% 0.003 95);
+  --color-sunken: oklch(94.6% 0.004 95);
+
+  /* Text */
+  --color-ink: oklch(24% 0.006 95);
+  --color-ink-muted: oklch(50% 0.008 95);
+  --color-ink-faint: oklch(64% 0.008 95);
+
+  /* Lines */
+  --color-line: oklch(91% 0.004 95);
+  --color-line-strong: oklch(85% 0.005 95);
+
+  /* One accent, used for actions only */
+  --color-accent: oklch(52% 0.13 255);
+  --color-accent-hover: oklch(46% 0.14 255);
+  --color-accent-ink: oklch(99% 0.005 255);
+  --color-accent-soft: oklch(95.5% 0.025 255);
+
+  --color-danger: oklch(52% 0.19 27);
+  --color-danger-soft: oklch(96.5% 0.028 27);
+
+  /* Code surfaces stay dark in both themes: syntax palettes are tuned for it
+     and a light block in a dark thread is a flashbang. */
+  --color-code-bg: oklch(21% 0.014 260);
+  --color-code-head: oklch(25% 0.016 260);
+  --color-code-line: oklch(32% 0.018 260);
+  --color-code-ink: oklch(72% 0.02 260);
+
+  --radius-card: 0.75rem;
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+
+  --shadow-lift: 0 1px 2px oklch(0% 0 0 / 0.05), 0 4px 12px oklch(0% 0 0 / 0.06);
+}
+
+/* Dark palette. Warm-neutral rather than blue-black, so code blocks and the
+   accent are the only things carrying hue. */
+@layer base {
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']) {
+      --color-canvas: oklch(17.5% 0.005 95);
+      --color-surface: oklch(20.5% 0.006 95);
+      --color-raised: oklch(24% 0.007 95);
+      --color-sunken: oklch(28.5% 0.008 95);
+
+      --color-ink: oklch(95% 0.004 95);
+      --color-ink-muted: oklch(72% 0.008 95);
+      --color-ink-faint: oklch(58% 0.008 95);
+
+      --color-line: oklch(28% 0.007 95);
+      --color-line-strong: oklch(36% 0.009 95);
+
+      --color-accent: oklch(72% 0.12 255);
+      --color-accent-hover: oklch(78% 0.12 255);
+      --color-accent-ink: oklch(19% 0.02 255);
+      --color-accent-soft: oklch(28% 0.045 255);
+
+      --color-danger: oklch(70% 0.16 27);
+      --color-danger-soft: oklch(27% 0.05 27);
+
+      --shadow-lift: 0 1px 2px oklch(0% 0 0 / 0.3), 0 6px 20px oklch(0% 0 0 / 0.28);
+    }
+  }
+
+  /* Explicit choice wins over the system preference, in both directions. */
+  :root[data-theme='dark'] {
+    --color-canvas: oklch(17.5% 0.005 95);
+    --color-surface: oklch(20.5% 0.006 95);
+    --color-raised: oklch(24% 0.007 95);
+    --color-sunken: oklch(28.5% 0.008 95);
+
+    --color-ink: oklch(95% 0.004 95);
+    --color-ink-muted: oklch(72% 0.008 95);
+    --color-ink-faint: oklch(58% 0.008 95);
+
+    --color-line: oklch(28% 0.007 95);
+    --color-line-strong: oklch(36% 0.009 95);
+
+    --color-accent: oklch(72% 0.12 255);
+    --color-accent-hover: oklch(78% 0.12 255);
+    --color-accent-ink: oklch(19% 0.02 255);
+    --color-accent-soft: oklch(28% 0.045 255);
+
+    --color-danger: oklch(70% 0.16 27);
+    --color-danger-soft: oklch(27% 0.05 27);
+
+    --shadow-lift: 0 1px 2px oklch(0% 0 0 / 0.3), 0 6px 20px oklch(0% 0 0 / 0.28);
+  }
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  html {
+    color-scheme: light dark;
+  }
+
+  body {
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Numbers in the sidebar and usage line shouldn't jitter as they change. */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  ::selection {
+    background: var(--color-accent-soft);
+    color: var(--color-ink);
+  }
+
+  /* A quiet scrollbar; the default light-on-dark one is very loud. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-line-strong) transparent;
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-line-strong);
+    border-radius: 999px;
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-ink-faint);
+    background-clip: content-box;
+  }
+}
+
+@layer utilities {
+  /* The streaming caret: a thin bar that blinks only while text is arriving. */
+  @keyframes caret {
+    0%, 45% { opacity: 1; }
+    55%, 100% { opacity: 0.15; }
+  }
+  .animate-caret {
+    animation: caret 1s ease-in-out infinite;
+  }
+
+  @keyframes riseIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: none; }
+  }
+  .animate-rise {
+    animation: riseIn 0.18s ease-out both;
+  }
+
+  @keyframes shimmer {
+    0% { opacity: 0.35; }
+    50% { opacity: 0.85; }
+    100% { opacity: 0.35; }
+  }
+  .animate-shimmer {
+    animation: shimmer 1.4s ease-in-out infinite;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

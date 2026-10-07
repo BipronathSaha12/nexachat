@@ -1,0 +1,721 @@
+openapi: 3.0.3
+info:
+  title: LLM Powered AI Chatbot API
+  version: 1.0.0
+  description: Django + DRF backend for the Gemini-backed chatbot.
+paths:
+  /api/auth/login/:
+    post:
+      operationId: auth_login_create
+      description: |-
+        Takes a set of user credentials and returns an access and refresh JSON web
+        token pair to prove the authentication of those credentials.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+        required: true
+      security:
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/auth/logout/:
+    post:
+      operationId: auth_logout_create
+      description: Blacklists the refresh token so it cannot be replayed after logout.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LogoutRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/LogoutRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/LogoutRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '205':
+          description: No response body
+  /api/auth/me/:
+    get:
+      operationId: auth_me_retrieve
+      tags:
+      - auth
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+  /api/auth/refresh/:
+    post:
+      operationId: auth_refresh_create
+      description: |-
+        Takes a refresh type JSON web token and returns an access type JSON web
+        token if the refresh token is valid.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRefresh'
+          description: ''
+  /api/auth/register/:
+    post:
+      operationId: auth_register_create
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+  /api/auth/verify/:
+    post:
+      operationId: auth_verify_create
+      description: |-
+        Takes a token and indicates if it is valid.  This view provides no
+        information about a token's fitness for a particular use.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenVerifyRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenVerifyRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenVerifyRequest'
+        required: true
+      responses:
+        '200':
+          description: No response body
+  /api/conversations/:
+    get:
+      operationId: conversations_list
+      description: |-
+        CRUD over the caller's own conversations (PRD 5.6).
+
+        The queryset is user-scoped at the source, so there is no object-level
+        permission to forget: another user's row is simply not visible.
+      parameters:
+      - name: cursor
+        required: false
+        in: query
+        description: The pagination cursor value.
+        schema:
+          type: string
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - conversations
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedConversationListList'
+          description: ''
+    post:
+      operationId: conversations_create
+      description: |-
+        CRUD over the caller's own conversations (PRD 5.6).
+
+        The queryset is user-scoped at the source, so there is no object-level
+        permission to forget: another user's row is simply not visible.
+      tags:
+      - conversations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConversationWriteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ConversationWriteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ConversationWriteRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversationWrite'
+          description: ''
+  /api/conversations/{id}/:
+    get:
+      operationId: conversations_retrieve
+      description: |-
+        CRUD over the caller's own conversations (PRD 5.6).
+
+        The queryset is user-scoped at the source, so there is no object-level
+        permission to forget: another user's row is simply not visible.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      tags:
+      - conversations
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversationDetail'
+          description: ''
+    put:
+      operationId: conversations_update
+      description: |-
+        CRUD over the caller's own conversations (PRD 5.6).
+
+        The queryset is user-scoped at the source, so there is no object-level
+        permission to forget: another user's row is simply not visible.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      tags:
+      - conversations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConversationWriteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ConversationWriteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ConversationWriteRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversationWrite'
+          description: ''
+    patch:
+      operationId: conversations_partial_update
+      description: |-
+        CRUD over the caller's own conversations (PRD 5.6).
+
+        The queryset is user-scoped at the source, so there is no object-level
+        permission to forget: another user's row is simply not visible.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      tags:
+      - conversations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedConversationWriteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedConversationWriteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedConversationWriteRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversationWrite'
+          description: ''
+    delete:
+      operationId: conversations_destroy
+      description: |-
+        CRUD over the caller's own conversations (PRD 5.6).
+
+        The queryset is user-scoped at the source, so there is no object-level
+        permission to forget: another user's row is simply not visible.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      tags:
+      - conversations
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/conversations/{id}/messages/:
+    get:
+      operationId: conversations_messages_list
+      description: Paged message history -- the detail endpoint inlines only the recent
+        turns.
+      parameters:
+      - name: cursor
+        required: false
+        in: query
+        description: The pagination cursor value.
+        schema:
+          type: string
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9a-f-]{36}$
+        required: true
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - conversations
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedMessageList'
+          description: ''
+  /api/chat/:
+    post:
+      operationId: chat_create
+      description: |
+        Streams the assistant reply as Server-Sent Events.
+
+        Frames:
+
+        * `event: meta` — `{conversation_id, user_message_id, model, request_id, context_messages, dropped_messages}`
+        * `event: delta` — `{text}`, repeated as the model produces output
+        * `event: done` — `{message_id, conversation_id, finish_reason, title, usage}`
+        * `event: error` — `{code, message, request_id}`
+        * `: heartbeat` — comment frame sent during idle gaps to keep proxies from closing the connection
+
+        Exactly one terminal frame (`done` or `error`) is sent. Failures detected before the
+        response starts are returned as a normal JSON error with an appropriate status code;
+        failures after streaming has begun arrive as an `error` frame on a 200 response.
+      summary: Send a message and stream the reply
+      tags:
+      - chat
+      security:
+      - jwtAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - message
+              properties:
+                message:
+                  type: string
+                  maxLength: 32000
+                conversation_id:
+                  type: string
+                  format: uuid
+                  nullable: true
+                  description: Omit to start a new conversation.
+                idempotency_key:
+                  type: string
+                  maxLength: 128
+            example:
+              conversation_id: null
+              message: Explain React hooks
+      responses:
+        '200':
+          description: SSE stream of the reply.
+          content:
+            text/event-stream:
+              schema:
+                type: string
+        '400':
+          description: Malformed JSON or a failed field validation.
+        '401':
+          description: Missing or invalid bearer token.
+        '404':
+          description: The conversation does not exist for this user.
+        '413':
+          description: The message or conversation exceeds the context budget.
+        '429':
+          description: Rate limited. See the Retry-After header.
+        '502':
+          description: The AI service could not be reached.
+        '504':
+          description: The AI service timed out.
+components:
+  schemas:
+    ConversationDetail:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        title:
+          type: string
+          maxLength: 200
+        system_instruction:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        messages:
+          type: array
+          items: {}
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - messages
+      - updated_at
+    ConversationList:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        title:
+          type: string
+          maxLength: 200
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        message_count:
+          type: integer
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - message_count
+      - updated_at
+    ConversationWrite:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        title:
+          type: string
+          maxLength: 200
+        system_instruction:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - updated_at
+    ConversationWriteRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        system_instruction:
+          type: string
+    LoginRequest:
+      type: object
+      description: Adds the user payload to the token response so the client needs
+        one round trip.
+      properties:
+        email:
+          type: string
+          writeOnly: true
+          minLength: 1
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - email
+      - password
+    LogoutRequest:
+      type: object
+      properties:
+        refresh:
+          type: string
+          minLength: 1
+      required:
+      - refresh
+    Message:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        role:
+          allOf:
+          - $ref: '#/components/schemas/RoleEnum'
+          readOnly: true
+        content:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        model:
+          type: string
+          readOnly: true
+        input_tokens:
+          type: integer
+          readOnly: true
+          nullable: true
+        output_tokens:
+          type: integer
+          readOnly: true
+          nullable: true
+        latency_ms:
+          type: integer
+          readOnly: true
+          nullable: true
+        is_error:
+          type: boolean
+          readOnly: true
+      required:
+      - content
+      - created_at
+      - id
+      - input_tokens
+      - is_error
+      - latency_ms
+      - model
+      - output_tokens
+      - role
+    PaginatedConversationListList:
+      type: object
+      required:
+      - results
+      properties:
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cD00ODY%3D"
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConversationList'
+    PaginatedMessageList:
+      type: object
+      required:
+      - results
+      properties:
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cD00ODY%3D"
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?cursor=cj0xJnA9NDg3
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Message'
+    PatchedConversationWriteRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        system_instruction:
+          type: string
+    RegisterRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+          maxLength: 254
+        display_name:
+          type: string
+          maxLength: 150
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - email
+      - password
+    RoleEnum:
+      enum:
+      - user
+      - assistant
+      - system
+      type: string
+      description: |-
+        * `user` - User
+        * `assistant` - Assistant
+        * `system` - System
+    TokenRefresh:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+      required:
+      - access
+      - refresh
+    TokenRefreshRequest:
+      type: object
+      properties:
+        refresh:
+          type: string
+          minLength: 1
+      required:
+      - refresh
+    TokenVerifyRequest:
+      type: object
+      properties:
+        token:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - token
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        email:
+          type: string
+          format: email
+          readOnly: true
+        display_name:
+          type: string
+          readOnly: true
+        email_verified:
+          type: boolean
+          readOnly: true
+        date_joined:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - date_joined
+      - display_name
+      - email
+      - email_verified
+      - id
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

@@ -1,0 +1,29 @@
+# Core
+Django==6.0.8
+djangorestframework==3.18.0
+djangorestframework-simplejwt==5.5.1
+django-cors-headers==4.9.0
+django-environ==0.14.0
+drf-spectacular==0.30.0
+
+# Database
+psycopg[binary]==3.3.4
+
+# Cache / rate limiting
+redis==8.1.0
+django-redis==7.0.0
+
+# AI
+google-genai==2.19.0
+
+# Auth
+argon2-cffi==25.1.0
+
+# Serving
+gunicorn==26.1.0
+uvicorn[standard]==0.52.4
+whitenoise==6.12.0
+
+# Observability
+sentry-sdk==2.68.0
+structlog==26.1.0

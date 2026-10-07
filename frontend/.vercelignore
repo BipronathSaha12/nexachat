@@ -1,0 +1,8 @@
+node_modules
+dist
+coverage
+.vite
+*.log
+src/**/*.test.js
+src/**/*.test.jsx
+src/test

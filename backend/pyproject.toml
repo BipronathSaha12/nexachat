@@ -1,0 +1,43 @@
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+exclude = [".venv", "migrations", "staticfiles"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "C4", "DJ", "S", "RET", "SIM", "ARG", "PL"]
+ignore = [
+    "S101",    # assert -- used throughout the test suite
+    "PLR0913", # many arguments -- the stream generator legitimately takes several
+    "PLR2004", # magic values in comparisons
+    "B008",    # function call in default argument
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Django/DRF dictate these signatures; the unused parameters are part of the contract.
+"*/admin.py" = ["ARG002"]
+"*/views.py" = ["ARG001", "ARG002"]
+"config/urls.py" = ["ARG001"]
+"*/tests/*" = ["S105", "S106", "ARG001", "ARG002", "ARG005", "PLR2004"]
+"tests/*" = ["S105", "S106", "ARG001", "ARG002", "ARG005", "PLR2004"]
+"config/settings/*" = ["F403", "F405"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["chat", "common", "config", "conversations", "users"]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings.test"
+python_files = ["test_*.py", "tests.py"]
+addopts = "-q --strict-markers --disable-warnings"
+asyncio_mode = "auto"
+markers = [
+    "integration: hits the real Gemini API; excluded from the default run",
+]
+filterwarnings = ["ignore::DeprecationWarning"]
+
+[tool.coverage.run]
+source = ["chat", "common", "conversations", "users"]
+omit = ["*/migrations/*", "*/tests/*", "config/*"]
+
+[tool.coverage.report]
+fail_under = 75
+show_missing = true

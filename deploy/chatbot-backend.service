@@ -1,0 +1,38 @@
+[Unit]
+Description=Chatbot backend (Django ASGI, Gemini streaming)
+After=network.target postgresql.service redis-server.service
+Requires=postgresql.service
+
+[Service]
+Type=simple
+User=chatbot
+Group=chatbot
+WorkingDirectory=/home/chatbot/app/backend
+EnvironmentFile=/home/chatbot/app/.env
+
+# ASGI is required: the chat endpoint streams, and a sync worker would hold a
+# thread for the whole generation.
+#
+# --timeout 120 must exceed GEMINI_TIMEOUT_SECONDS (60) plus retries, or gunicorn
+# kills a worker mid-stream. No --max-requests: recycling a worker while a reply
+# is streaming would truncate it.
+ExecStart=/home/chatbot/app/.venv/bin/gunicorn config.asgi:application \
+  -k uvicorn.workers.UvicornWorker \
+  -w 3 -b 127.0.0.1:8020 \
+  --timeout 120 --graceful-timeout 60 \
+  --access-logfile /home/chatbot/logs/gunicorn-access.log \
+  --error-logfile /home/chatbot/logs/gunicorn-error.log
+
+Restart=always
+RestartSec=3
+KillSignal=SIGTERM
+
+# Hardening: the app only ever writes to its own tree.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=read-only
+ReadWritePaths=/home/chatbot/app /home/chatbot/logs
+
+[Install]
+WantedBy=multi-user.target

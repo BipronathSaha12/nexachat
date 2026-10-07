@@ -1,0 +1,138 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: backend tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: chatbot
+          POSTGRES_PASSWORD: chatbot
+          POSTGRES_DB: chatbot
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U chatbot"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+      redis:
+        image: redis:7
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+
+    env:
+      SECRET_KEY: ci-only-not-a-real-secret
+      DEBUG: "False"
+      ALLOWED_HOSTS: localhost,127.0.0.1,testserver
+      DATABASE_URL: postgres://chatbot:chatbot@localhost:5432/chatbot
+      REDIS_URL: redis://localhost:6379/0
+      GEMINI_API_KEY: ci-placeholder
+      ENVIRONMENT: ci
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements/*.txt
+
+      - run: pip install -r requirements/dev.txt
+      - run: ruff check .
+      - run: python manage.py check --settings=config.settings.test
+      - name: no missing migrations
+        run: python manage.py makemigrations --check --dry-run --settings=config.settings.test
+      - run: pytest tests/ -q --cov
+      - name: deployment checks
+        run: python manage.py check --deploy --settings=config.settings.prod
+
+  frontend:
+    name: frontend tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run cover
+      - run: npm run build
+
+      - name: guard against raw HTML rendering
+        # Model output must never become live markup (PRD 7). Checks real usage --
+        # an import or a JSX attribute -- not the word appearing in a comment.
+        run: |
+          failed=0
+          if grep -rnE "(from|require\()\s*['\"]rehype-raw['\"]" src/; then
+            echo "::error::rehype-raw makes model output executable. Do not add it."
+            failed=1
+          fi
+          if grep -rn "dangerouslySetInnerHTML=" src/; then
+            echo "::error::dangerouslySetInnerHTML is not permitted in this app."
+            failed=1
+          fi
+          [ "$failed" -eq 0 ] && echo "No raw HTML rendering found."
+          exit $failed
+
+  deploy-backend:
+    name: deploy backend to VPS
+    needs: [backend, frontend]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    # A GitHub Environment gives this the option of a required reviewer and keeps
+    # the deploy secrets out of every other job.
+    environment:
+      name: production
+      url: https://chatbot.devtechguru.cloud
+
+    steps:
+      - name: install ssh key
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          # Pinned host key: without this the first connection would trust
+          # whatever answers, which is the whole attack we are avoiding.
+          printf '%s\n' "${{ secrets.VPS_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
+      - name: deploy
+        run: |
+          ssh -o BatchMode=yes -o ConnectTimeout=20 \
+            "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" \
+            "/usr/local/bin/chatbot-deploy origin/${{ github.sha }}" || \
+          ssh -o BatchMode=yes -o ConnectTimeout=20 \
+            "${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}" \
+            "/usr/local/bin/chatbot-deploy origin/main"
+
+      - name: verify live
+        run: |
+          for i in $(seq 1 20); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 https://chatbot.devtechguru.cloud/readyz/ || true)
+            if [ "$code" = "200" ]; then echo "live and ready"; exit 0; fi
+            echo "  attempt $i: HTTP $code"; sleep 5
+          done
+          echo "::error::backend did not become ready"; exit 1
