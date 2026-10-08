@@ -1,83 +1,64 @@
 # NexaChat Backend
 
-The NexaChat backend is a robust Python service designed to handle user authentication, conversation persistence, and real-time streaming of AI-generated responses.
+The NexaChat backend is a robust Python service built on Django. It handles user authentication, conversation persistence, and real-time streaming of AI-generated responses from Google's Gemini models.
 
 ---
 
 ## 🛠 Tech Stack
 
 - **Language**: Python 3.9+
-- **Framework**: FastAPI / Starlette (High-performance async API framework)
-- **Server**: Uvicorn (ASGI web server)
+- **Framework**: Django
+- **Database**: SQLite3 (Local) / PostgreSQL (Production via Neon)
+- **AI Integration**: Google Gemini API
 - **Dependencies**: Managed via standard `requirements.txt`
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Local Development Setup
 
-Follow these steps to set up the Python backend locally.
-
-### Prerequisites
-- **Python**: Version 3.9 or higher.
-- **Virtual Environment Tool**: `venv`, `uv`, or `virtualenv`.
-
-### Installation
-
-1. **Navigate to the backend directory** (or root if configured as such):
+1. **Navigate to the backend directory**:
    ```bash
    cd backend
    ```
 
-2. **Create a virtual environment**:
-   Isolating your dependencies is highly recommended.
-   ```bash
-   python -m venv .venv
-   ```
-
-3. **Activate the virtual environment**:
-   - **Windows**:
+2. **Create and activate a virtual environment**:
+   - **Windows**: 
      ```bash
+     python -m venv .venv
      .venv\Scripts\activate
      ```
-   - **macOS/Linux**:
+   - **macOS/Linux**: 
      ```bash
+     python3 -m venv .venv
      source .venv/bin/activate
      ```
 
-4. **Install required packages**:
+3. **Install dependencies**:
    ```bash
    pip install -r requirements.txt
    ```
 
----
+4. **Environment Variables**:
+   Copy `.env.example` to `.env` and fill in:
+   - `GEMINI_API_KEY`: Your Gemini API key from Google AI Studio.
+   - Leave `DATABASE_URL` empty to default to local SQLite, or add a Neon Postgres URL.
 
-## ⚙️ Configuration
-
-The backend relies on environment variables for sensitive configurations (like AI provider API keys, database URLs, and JWT secrets).
-
-1. Copy the example environment file:
+5. **Run Migrations**:
+   Setup your database schema:
    ```bash
-   cp .env.example .env
+   python manage.py migrate
    ```
-2. Open `.env` and fill in the required values (e.g., `GEMINI_API_KEY`, etc.).
 
----
-
-## 🏃 Running the Server
-
-To start the backend in development mode (with auto-reload enabled):
-
-```bash
-uvicorn main:app --reload
-```
-*(Note: If your application entry point is different, adjust `main:app` to match your application factory or instance).*
-
-The API will typically be available at `http://127.0.0.1:8000`. You can also access the auto-generated Swagger documentation at `http://127.0.0.1:8000/docs`.
+6. **Start the Development Server**:
+   ```bash
+   python manage.py runserver
+   ```
+   The backend will typically be available at `http://127.0.0.1:8000`.
 
 ---
 
 ## 🧠 Core Capabilities
 
 - **Streaming Architecture**: Leverages Server-Sent Events (SSE) to stream tokens directly to the frontend, ensuring zero perceived latency for large AI responses.
-- **Conversation State**: Maintains chat history to provide contextual awareness for subsequent prompts.
+- **Conversation State**: Django models maintain chat history to provide contextual awareness for subsequent prompts.
 - **Robust Error Handling**: Standardized error responses to gracefully handle token limits, API timeouts, and authentication failures.
