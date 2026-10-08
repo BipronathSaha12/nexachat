@@ -41,4 +41,4 @@ To get started with local development or deployment, please refer to the dedicat
 
 ## 📜 License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License. See the [LICENSE](https://github.com/BipronathSaha12/nexachat/blob/main/LICENSE) file for details.
