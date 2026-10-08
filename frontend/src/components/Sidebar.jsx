@@ -15,9 +15,10 @@ function ThemeToggle() {
       onClick={cycle}
       aria-label={THEME_LABEL[theme]}
       title={`${THEME_LABEL[theme]} — click to change`}
-      className="flex size-8 items-center justify-center rounded-lg text-ink-muted transition hover:bg-raised hover:text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+      className="flex w-full items-center justify-between gap-2 rounded-xl border border-line bg-surface px-3 py-2 text-[13px] font-medium text-ink transition hover:border-line-strong hover:bg-raised focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
     >
-      <Icon />
+      <span>{THEME_LABEL[theme]}</span>
+      <Icon width={15} height={15} />
     </button>
   )
 }
@@ -93,26 +94,28 @@ export default function Sidebar({
           />
         </nav>
 
-        <div className="flex items-center gap-2 border-t border-line px-3 py-2.5">
-          <span
-            aria-hidden="true"
-            className="flex size-7 shrink-0 items-center justify-center rounded-full bg-raised text-[11px] font-semibold text-ink-muted"
-          >
-            {initial}
-          </span>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-[12.5px] text-ink" title={user?.email}>
-              {user?.display_name || user?.email}
-            </p>
-            <button
-              type="button"
-              onClick={logout}
-              className="text-[11px] text-ink-muted transition hover:text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-            >
-              Sign out
-            </button>
-          </div>
+        <div className="flex flex-col gap-3 border-t border-line px-3 py-3">
           <ThemeToggle />
+          <div className="flex items-center gap-2">
+            <span
+              aria-hidden="true"
+              className="flex size-7 shrink-0 items-center justify-center rounded-full bg-raised text-[11px] font-semibold text-ink-muted"
+            >
+              {initial}
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-[12.5px] text-ink" title={user?.email}>
+                {user?.display_name || user?.email}
+              </p>
+              <button
+                type="button"
+                onClick={logout}
+                className="text-[11px] text-ink-muted transition hover:text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              >
+                Sign out
+              </button>
+            </div>
+          </div>
         </div>
       </aside>
     </>
