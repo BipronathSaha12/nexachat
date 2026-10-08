@@ -15,7 +15,7 @@ function ThemeToggle() {
       onClick={cycle}
       aria-label={THEME_LABEL[theme]}
       title={`${THEME_LABEL[theme]} — click to change`}
-      className="flex size-8 items-center justify-center rounded-lg text-ink-faint transition hover:bg-raised hover:text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+      className="flex size-8 items-center justify-center rounded-lg text-ink-muted transition hover:bg-raised hover:text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
     >
       <Icon />
     </button>
@@ -58,14 +58,14 @@ export default function Sidebar({
           <span className="flex size-7 items-center justify-center rounded-lg bg-accent text-accent-ink">
             <SparkIcon width={15} height={15} />
           </span>
-          <span className="flex-1 text-[13px] font-semibold tracking-tight text-ink">
+          <h1 className="flex-1 text-[13px] font-semibold tracking-tight text-ink">
             AI Chatbot
-          </span>
+          </h1>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close sidebar"
-            className="flex size-8 items-center justify-center rounded-lg text-ink-faint transition hover:bg-raised hover:text-ink md:hidden"
+            className="flex size-8 items-center justify-center rounded-lg text-ink-muted transition hover:bg-raised hover:text-ink md:hidden"
           >
             <CloseIcon />
           </button>
@@ -107,7 +107,7 @@ export default function Sidebar({
             <button
               type="button"
               onClick={logout}
-              className="text-[11px] text-ink-faint transition hover:text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              className="text-[11px] text-ink-muted transition hover:text-ink focus:outline-none focus-visible:ring-2 focus-visible:ring-accent"
             >
               Sign out
             </button>

@@ -89,7 +89,7 @@ export default function ChatInput({ onSend, onStop, isBusy, disabled }) {
           )}
         </div>
 
-        <div className="mt-2 flex min-h-4 items-center justify-between px-1 text-[11px] text-ink-faint">
+        <div className="mt-2 flex min-h-4 items-center justify-between px-1 text-[11px] text-ink-muted">
           {/* The keyboard hint is meaningless on a touch keyboard. */}
           <span className="hidden sm:inline">
             <kbd className="font-sans">Enter</kbd> to send ·{' '}

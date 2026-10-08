@@ -156,6 +156,14 @@
     background: var(--color-ink-faint);
     background-clip: content-box;
   }
+
+  /* Override Prism comment color for better accessibility / contrast */
+  .token.comment,
+  .token.prolog,
+  .token.doctype,
+  .token.cdata {
+    color: #8a92a3 !important;
+  }
 }
 
 @layer utilities {
