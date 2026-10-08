@@ -39,7 +39,7 @@ The Vite/React frontend is built perfectly for [Vercel](https://vercel.com).
 2. Set the Framework Preset to **Vite**.
 3. Set the Root Directory to `frontend`.
 4. **Environment Variables**:
-   - Add the necessary environment variables to point your frontend to your Render backend (e.g., `VITE_API_URL=https://your-app.onrender.com`).
+   - Add the necessary environment variables to point your frontend to your Render backend (e.g., `VITE_API_BASE_URL=https://your-app.onrender.com`).
 5. Click **Deploy**.
 
 ---
