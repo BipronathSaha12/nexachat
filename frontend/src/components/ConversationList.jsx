@@ -152,9 +152,9 @@ export default function ConversationList({
     <div className="space-y-4 px-2 pb-2">
       {groups.map(([label, items]) => (
         <div key={label}>
-          <h3 className="px-2.5 pb-1 text-[11px] font-medium tracking-wide text-ink-muted uppercase">
+          <h2 className="px-2.5 pb-1 text-[11px] font-medium tracking-wide text-ink-muted uppercase">
             {label}
-          </h3>
+          </h2>
           <ul className="space-y-0.5">
             {items.map((conversation) => (
               <ConversationItem

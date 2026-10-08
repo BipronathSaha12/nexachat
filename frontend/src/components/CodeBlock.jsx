@@ -23,6 +23,15 @@ import { CheckIcon, CopyIcon } from './icons'
 const LANGUAGES = {
   bash, css, diff, go, java, javascript, json, jsx, markup, python, rust, sql, tsx, typescript, yaml,
 }
+
+// Override low-contrast tokens in the oneDark theme
+const customOneDark = { ...oneDark }
+const AccessibleColor = '#8a92a3'
+;['comment', 'prolog', 'doctype', 'cdata'].forEach((token) => {
+  if (customOneDark[token]) {
+    customOneDark[token] = { ...customOneDark[token], color: AccessibleColor }
+  }
+})
 for (const [name, definition] of Object.entries(LANGUAGES)) {
   SyntaxHighlighter.registerLanguage(name, definition)
 }
@@ -105,7 +114,7 @@ export default function CodeBlock({ code, language }) {
         <div ref={scrollRef} className="overflow-x-auto">
           <SyntaxHighlighter
             language={resolved ?? 'text'}
-            style={oneDark}
+            style={customOneDark}
             customStyle={{
               margin: 0,
               padding: '0.9rem 1rem',

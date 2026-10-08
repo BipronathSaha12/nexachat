@@ -8,8 +8,10 @@
 # --- python ---
 __pycache__/
 *.py[cod]
+*$py.class
 .venv/
 venv/
+env/
 *.egg-info/
 .pytest_cache/
 .coverage
@@ -17,7 +19,7 @@ htmlcov/
 .mypy_cache/
 .ruff_cache/
 
-# --- django ---
+# --- django / fastAPI ---
 *.sqlite3
 /backend/staticfiles/
 /backend/media/
@@ -29,8 +31,10 @@ dist/
 coverage/
 *.log
 *.tsbuildinfo
+.npm/
 
 # --- os / editor ---
 .DS_Store
 .idea/
 .vscode/
+*.swp
