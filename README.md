@@ -29,6 +29,7 @@ The Django backend is optimized for deployment on [Render](https://render.com).
    - `DATABASE_URL`: Your Neon PostgreSQL connection string.
    - `GEMINI_API_KEY`: Your Google Gemini API key.
    - `SECRET_KEY`: A strong, randomly generated string.
+   - `DJANGO_SETTINGS_MODULE`: `config.settings.prod`
    - `ALLOWED_HOSTS`: Your Render domain (e.g., `your-app.onrender.com`).
    - `CORS_ALLOWED_ORIGINS`: Your Vercel frontend URL.
 
