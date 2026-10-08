@@ -99,19 +99,26 @@ AUTH_USER_MODEL = "users.User"
 # --------------------------------------------------------------------------
 # Cache / Redis
 # --------------------------------------------------------------------------
-REDIS_URL = env("REDIS_URL", default="redis://localhost:6379/0")
-
-CACHES = {
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": REDIS_URL,
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-            "IGNORE_EXCEPTIONS": False,
-        },
-        "KEY_PREFIX": f"chatbot:{ENVIRONMENT}",
+REDIS_URL = env("REDIS_URL", default="")
+if REDIS_URL:
+    CACHES = {
+        "default": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": REDIS_URL,
+            "OPTIONS": {
+                "CLIENT_CLASS": "django_redis.client.DefaultClient",
+                "IGNORE_EXCEPTIONS": False,
+            },
+            "KEY_PREFIX": f"chatbot:{ENVIRONMENT}",
+        }
     }
-}
+else:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": f"chatbot:{ENVIRONMENT}",
+        }
+    }
 
 # --------------------------------------------------------------------------
 # Password validation
