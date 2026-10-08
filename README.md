@@ -23,7 +23,7 @@ NexaChat is designed to use **PostgreSQL** in production.
 The Django backend is optimized for deployment on [Render](https://render.com).
 1. Create a new **Web Service** on Render and connect your GitHub repository.
 2. Set the Root Directory to `backend`.
-3. **Build Command**: `pip install -r requirements.txt && python manage.py migrate`
+3. **Build Command**: `pip install -r requirements/prod.txt && python manage.py migrate`
 4. **Start Command**: `gunicorn config.wsgi:application` (or your ASGI equivalent like Daphne for streaming).
 5. **Environment Variables**:
    - `DATABASE_URL`: Your Neon PostgreSQL connection string.

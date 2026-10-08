@@ -10,7 +10,7 @@ The NexaChat backend is a robust Python service built on Django. It handles user
 - **Framework**: Django
 - **Database**: SQLite3 (Local) / PostgreSQL (Production via Neon)
 - **AI Integration**: Google Gemini API
-- **Dependencies**: Managed via standard `requirements.txt`
+- **Dependencies**: Managed via standard `requirements/` directory
 
 ---
 
@@ -35,7 +35,7 @@ The NexaChat backend is a robust Python service built on Django. It handles user
 
 3. **Install dependencies**:
    ```bash
-   pip install -r requirements.txt
+   pip install -r requirements/dev.txt
    ```
 
 4. **Environment Variables**:
